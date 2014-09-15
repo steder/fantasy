@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import collections
-import functools
 import itertools
 import json
 import os
@@ -10,26 +9,10 @@ import sys
 
 import requests
 
+from utils import memoize_to_disk
+
 
 FANDUEL_BASE_URL = "https://wwww.fanduel.com/e/Game/{}"
-
-
-def memoize_to_disk(func):
-    @functools.wraps(func)
-    def wrapper(*args):
-        data_path = "_".join(args) + ".data"
-
-        if os.path.exists(data_path):
-            with open(data_path, "r") as f:
-                data = json.load(f)
-        else:
-            data = func(*args)
-            with open(data_path, "w") as f:
-                json.dump(data, f)
-
-        return data
-
-    return wrapper
 
 
 def get_fanduel_game(game_id):
