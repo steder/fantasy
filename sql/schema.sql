@@ -30,8 +30,12 @@ CREATE TABLE IF NOT EXISTS players (
 
        -- trigger updated created/modified timestamps
        created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-       modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+       modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+       -- reject duplicate player records
+       UNIQUE (name, team, position, year, week)
 );
+
 
 
 CREATE OR REPLACE FUNCTION update_modified_timestamp() RETURNS TRIGGER
