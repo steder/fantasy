@@ -1,6 +1,7 @@
 
 import json
 import os
+import sys
 
 import requests
 
@@ -11,7 +12,7 @@ RANKING_URL = "http://www.fantasyfootballnerd.com/service/weekly-rankings/json/{
 
 
 def get_current_week():
-    return 1
+    return int(sys.argv[1])
 
 
 @memoize_to_disk
