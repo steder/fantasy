@@ -13,3 +13,7 @@ Nothing but chaos at the moment
 ### Everything else:
 
     pip install -r requirements.txt
+
+### Basic usage:
+
+    FFN_API_KEY=<your api key> pipeline.sh <Game ID> <Week>
