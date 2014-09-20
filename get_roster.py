@@ -5,11 +5,15 @@ import math
 import random
 import sys
 
+from jinja2 import Template
 from sqlalchemy import create_engine
 from sqlalchemy import text
 
+with open("templates/index.html", "r") as template_file:
+    template = Template(template_file.read())
 
-WEEK = 3
+
+WEEK = int(sys.argv[1])
 
 
 engine = create_engine('postgresql://127.0.0.1/fantasy', echo=True)
@@ -123,10 +127,7 @@ print "Generated %s rosters total, kept %s"%(generated, len(rosters))
 
 # sort by cost then points
 rosters.sort(key=lambda r: (r[1], r[0]), reverse=True)
-
-
 print "ROSTERS:"
-
 for i, roster in enumerate(rosters[:10]):
     print "ROSTER: %s"%(i,)
     cost, points, players = roster
@@ -134,8 +135,8 @@ for i, roster in enumerate(rosters[:10]):
         print player
     print cost, points
 
+max_cap_rosters.sort(key=lambda r: (r[1], r[0]), reverse=True)
 print "MAX ROSTERS:"
-
 for i, roster in enumerate(max_cap_rosters[:10]):
     print "MAX ROSTER: %s"%(i,)
     cost, points, players = roster
@@ -154,3 +155,17 @@ for player in best_roster:
     print player
 print "best cost:", cost
 print "best points:", points
+
+
+with open("roster.html", "w") as roster_file:
+    html = template.render(
+        rosters=rosters[:10],
+        max_rosters=max_cap_rosters[:10],
+        best_roster=best_roster,
+        best_cost=cost,
+        best_points=points,
+        week=WEEK,
+        generated=generated,
+        possible_players=total_players
+    )
+    roster_file.write(html)

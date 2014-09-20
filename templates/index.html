@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Bootstrap -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <h1>Rosters for Game ({{game_id}}) on week {{week}}</h1>
+    <h2>Fun Facts</h2>
+    <ul>
+      <li>Generated {{generated}} Rosters</li>
+      <li>Rosters contain a random assortment of {{possible_players}} possible players</li>
+    </ul>
+    <h2>Rosters By Score</h2>
+    {% for cost, points, players in rosters %}
+    <h3>Roster {{loop.index}}: Points {{points}}, Cost {{cost}}</h3>
+    <table class="table">
+      <thead>
+        <th>Name</th>
+        <th>Team</th>
+        <th>Position</th>
+        <th>Salary</th>
+        <th>Projected</th>
+      </thead>
+      <tbody>
+        {% for player in players %}
+        <tr>
+          <td>{{player.name}}</td>
+          <td>{{player.team}}</td>
+          <td>{{player.position}}</td>
+          <td>{{player.salary}}</td>
+          <td>{{player.ppr}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endfor %}
+    <h2>Max Cap Rosters By Score</h2>
+    {% for cost, points, players in max_rosters %}
+    <h3>Roster {{loop.index}}: Points {{points}}, Cost {{cost}}</h3>
+    <table class="table">
+      <thead>
+        <th>Name</th>
+        <th>Team</th>
+        <th>Position</th>
+        <th>Salary</th>
+        <th>Projected</th>
+      </thead>
+      <tbody>
+        {% for player in players %}
+        <tr>
+          <td>{{player.name}}</td>
+          <td>{{player.team}}</td>
+          <td>{{player.position}}</td>
+          <td>{{player.salary}}</td>
+          <td>{{player.ppr}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endfor %}
+
+    <h2>Best Roster Regardless of Cost: Points {{best_points}}, Cost {{best_cost}}</h2>
+    <table class="table">
+      <thead>
+        <th>Name</th>
+        <th>Team</th>
+        <th>Position</th>
+        <th>Salary</th>
+        <th>Projected</th>
+      </thead>
+      <tbody>
+        {% for player in best_roster %}
+        <tr>
+          <td>{{player.name}}</td>
+          <td>{{player.team}}</td>
+          <td>{{player.position}}</td>
+          <td>{{player.salary}}</td>
+          <td>{{player.ppr}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </body>
+</html>
