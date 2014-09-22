@@ -18,7 +18,8 @@ INITIAL_POPULATION_SIZE = 10000
 MUTATION_CHANCE = 0.001 # 0.1%
 ROSTER_SIZE = 9
 PERCENT_CROSSOVER = 1.0 # 100.0%
-MAX_GENERATIONS = 1000
+#PERCENT_CROSSOVER = 0.85 # 85.0%
+MAX_GENERATIONS = 100
 DESIRED_PERCENT_FITNESS = 90.0
 
 
@@ -153,6 +154,81 @@ rosters, max_cap_rosters, generated = generate_initial_population()
 print "Generated %s rosters total, kept %s"%(generated, len(rosters))
 
 
+def even_and_odd(rosters):
+    return itertools.izip(itertools.islice(rosters, 0, None, 2),
+                   itertools.islice(rosters, 1, None, 2))
+
+
+def even_and_odd_reverse(rosters):
+    return itertools.izip(itertools.islice(rosters, 0, None, 2),
+                          reversed(list(itertools.islice(rosters, 1, None, 2))))
+
+
+
+POSITION_INDICES = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+def crossover_single_players(rosters):
+    # sort by points and then cost:
+    rosters = sorted(rosters, key=lambda r: (r[1], r[0]), reverse=True)
+    new_generation = []
+    for parent1, parent2 in even_and_odd(rosters):
+        # parent roster tuple is (cost, projected_points, players)
+        # so parent[2] is the players list
+        child1 = copy.copy(parent1[2])
+        child2 = copy.copy(parent2[2])
+
+        names1 = [p.name for p in child1]
+        names2 = [p.name for p in child2]
+        names1.sort()
+        names2.sort()
+
+        if names1 == names2:
+            print "both parents are the same, dropping one"
+            new_generation.append(child1)
+            continue
+
+        # Rather than always crossing over we'll only crossover
+        # some of the time so some parents will simply continue
+        # on to the next generation, unchanged.
+        if random.random() <= PERCENT_CROSSOVER:
+            # pick a position and swap all the players at that position from one
+            # roster to another:
+            swapped = 0
+            attempts = 0
+            while swapped < 2:
+                attempts += 1
+                position = random.choice(POSITION_INDICES)
+                names1 = [p.name for p in child1]
+                names2 = [p.name for p in child2]
+                if ((child1[position].name != parent2[2][position].name)
+                    and
+                    (child2[position].name != parent1[2][position].name)
+                    and parent2[2][position].name not in names1
+                    and parent1[2][position].name not in names2
+                ):
+                    child1[position] = parent2[2][position]
+                    child2[position] = parent1[2][position]
+                    swapped += 1
+
+                if attempts > 100:
+                    print "I can't find a crossover for these 2 rosters:"
+                    #print "parent1:", parent1
+                    #print "parent2:", parent2
+                    print "parent1:", names1
+                    print "parent2:", names2
+                    print "Keeping 1"
+                    new_generation.append(child1)
+                    break
+
+            if swapped == 2:
+                new_generation.append(child1)
+                new_generation.append(child2)
+        else:
+            new_generation.append(child1)
+            new_generation.append(child2)
+
+    return new_generation
+
+
 def crossover(rosters):
     """
     Swap position / position groups randomly between rosters to build a new generation of rosters
@@ -165,11 +241,11 @@ def crossover(rosters):
       output rosters are just players
 
     """
+
     # sort by points and then cost:
     rosters = sorted(rosters, key=lambda r: (r[1], r[0]), reverse=True)
     new_generation = []
-    for parent1, parent2 in itertools.izip(itertools.islice(rosters, 0, None, 2),
-                                 itertools.islice(rosters, 1, None, 2)):
+    for parent1, parent2 in even_and_odd(rosters):
         # parent roster tuple is (cost, projected_points, players)
         # so parent[2] is the players list
         child1 = copy.copy(parent1[2])
@@ -290,7 +366,7 @@ print "Initial percent_fitness:", percent_fitness
 
 while generation < MAX_GENERATIONS and percent_fitness <= DESIRED_PERCENT_FITNESS:
     print "Not yet fit enough, performing crossover and mutation to generate new generation", generation, percent_fitness
-    rosters = cull(add_cost_and_points(mutate(crossover(rosters))))
+    rosters = cull(add_cost_and_points(mutate(crossover_single_players(rosters))))
     print "remaining rosters:", len(list(rosters))
     percent_fitness = compute_fitness(rosters)
     generation += 1
