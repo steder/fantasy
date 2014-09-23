@@ -12,6 +12,7 @@ from sqlalchemy import text
 
 
 WEEK = int(sys.argv[1])
+GAME_ID = int(sys.argv[2])
 SALARY_CAP = 60000
 POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 INITIAL_POPULATION_SIZE = 10000
@@ -395,7 +396,7 @@ for i, roster in enumerate(max_cap_rosters[:10]):
 with open("templates/index.html", "r") as template_file:
     template = Template(template_file.read())
 
-with open("roster.html", "w") as roster_file:
+with open("roster_{}.html".format(GAME_ID), "w") as roster_file:
     html = template.render(
         rosters=rosters[:10],
         max_rosters=max_cap_rosters[:10],
@@ -406,5 +407,6 @@ with open("roster.html", "w") as roster_file:
         week=WEEK,
         generated=generated,
         possible_players=total_players,
+        game_id=GAME_ID
     )
     roster_file.write(html)
