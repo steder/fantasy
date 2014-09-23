@@ -20,5 +20,5 @@ python load_projections.py $week
 echo "Loading salaries..."
 python load_salaries.py $week $game_id.data
 echo "Generating roster(s)..."
-python get_roster.py $week
-#open roster.html
+python get_roster.py $week $game_id
+open roster_$game_id.html
