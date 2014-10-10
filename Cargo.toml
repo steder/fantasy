@@ -1,0 +1,5 @@
+[package]
+
+name = "handegg"
+version = "0.0.1"
+authors = ["Mike Steder <steder@gmail.com>"]
