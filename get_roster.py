@@ -16,10 +16,10 @@ GAME_ID = int(sys.argv[2])
 SALARY_CAP = 60000
 POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 INITIAL_POPULATION_SIZE = 10000
-MUTATION_CHANCE = 0.001 # 0.1%
+MUTATION_CHANCE = 0.01 # 1.0%
 ROSTER_SIZE = 9
-PERCENT_CROSSOVER = 1.0 # 100.0%
-#PERCENT_CROSSOVER = 0.85 # 85.0%
+#PERCENT_CROSSOVER = 1.0 # 100.0%
+PERCENT_CROSSOVER = 0.85 # 85.0%
 MAX_GENERATIONS = 100
 DESIRED_PERCENT_FITNESS = 90.0
 
@@ -110,20 +110,16 @@ print "best cost:", best_cost
 print "best points:", best_points
 
 
-# let's expect 90% of our population to be at least 75% as good as the best team
-fitness = Decimal(0.75) * best_points
-ninety_percent_fitness = 0.0
-
 total_players = sum([len(x) for x in (qbs, rbs, wrs, tes, ks, defs)])
 print 'GENERATING ROSTERS... (with %s total players)'%(total_players,)
 
 
-def generate_initial_population():
+def generate_population(population_size, required_points=None):
     # rosters contains tuples of (cost, points, players)
     rosters = [] # collections.deque(maxlen=10)
     max_cap_rosters = []
     generated = 0
-    while len(rosters) < INITIAL_POPULATION_SIZE:
+    while len(rosters) < population_size:
         roster = []
         roster.append(random.choice(qbs))
         roster.extend(random.sample(rbs, 2))
@@ -139,6 +135,9 @@ def generate_initial_population():
 
         generated += 1
 
+        if required_points and points < required_points:
+            continue
+
         # What if instead of less than 60k...
         #
         if cost <= Decimal(SALARY_CAP):
@@ -150,9 +149,20 @@ def generate_initial_population():
     return rosters, max_cap_rosters, generated
 
 
-rosters, max_cap_rosters, generated = generate_initial_population()
+rosters, max_cap_rosters, generated = generate_population(INITIAL_POPULATION_SIZE, required_points=Decimal(100.0))
+
+
+AVERAGE_POINTS = sum(roster[1] for roster in rosters) / len(rosters)
+print "AVERAGE_POINTS {}".format(AVERAGE_POINTS)
+
 
 print "Generated %s rosters total, kept %s"%(generated, len(rosters))
+
+
+# let's expect 90% of our population to be at least 75% as good as the best team
+FITNESS = Decimal(0.75) * best_points
+print "COMPLETELY ARBITRARY FITNESS POINTS: %s"%(FITNESS,)
+ninety_percent_fitness = 0.0
 
 
 def even_and_odd(rosters):
@@ -164,12 +174,25 @@ def even_and_odd_reverse(rosters):
     return itertools.izip(itertools.islice(rosters, 0, None, 2),
                           reversed(list(itertools.islice(rosters, 1, None, 2))))
 
+def sort_by_fitness(roster):
+    """
+    Here we're sorting based on how close to the fitness value
+    these rosters are.
+    """
+    points = roster[1]
+    order_key = points - FITNESS
+    return order_key
 
 
 POSITION_INDICES = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 def crossover_single_players(rosters):
+    n_crossovers = 0
+    n_skips = 0
+    n_drops = 0
+
     # sort by points and then cost:
-    rosters = sorted(rosters, key=lambda r: (r[1], r[0]), reverse=True)
+    #rosters = sorted(rosters, key=lambda r: (r[1], r[0]), reverse=True)
+    rosters = sorted(rosters, key=sort_by_fitness)
     new_generation = []
     for parent1, parent2 in even_and_odd(rosters):
         # parent roster tuple is (cost, projected_points, players)
@@ -183,7 +206,8 @@ def crossover_single_players(rosters):
         names2.sort()
 
         if names1 == names2:
-            print "both parents are the same, dropping one"
+            #print "both parents are the same, dropping one"
+            n_drops += 1
             new_generation.append(child1)
             continue
 
@@ -191,6 +215,7 @@ def crossover_single_players(rosters):
         # some of the time so some parents will simply continue
         # on to the next generation, unchanged.
         if random.random() <= PERCENT_CROSSOVER:
+            n_crossovers += 1
             # pick a position and swap all the players at that position from one
             # roster to another:
             swapped = 0
@@ -211,12 +236,13 @@ def crossover_single_players(rosters):
                     swapped += 1
 
                 if attempts > 100:
-                    print "I can't find a crossover for these 2 rosters:"
-                    #print "parent1:", parent1
-                    #print "parent2:", parent2
-                    print "parent1:", names1
-                    print "parent2:", names2
-                    print "Keeping 1"
+                    n_skips += 1
+                    # print "I can't find a crossover for these 2 rosters:"
+                    # #print "parent1:", parent1
+                    # #print "parent2:", parent2
+                    # print "parent1:", names1
+                    # print "parent2:", names2
+                    # print "Keeping 1"
                     new_generation.append(child1)
                     break
 
@@ -226,6 +252,8 @@ def crossover_single_players(rosters):
         else:
             new_generation.append(child1)
             new_generation.append(child2)
+
+    print "%s crossovers, %s skips (crossover failures), and %s drops (inbreeding?) in this generation"%(n_crossovers, n_skips, n_drops)
 
     return new_generation
 
@@ -242,6 +270,8 @@ def crossover(rosters):
       output rosters are just players
 
     """
+    n_crossovers = 0
+
 
     # sort by points and then cost:
     rosters = sorted(rosters, key=lambda r: (r[1], r[0]), reverse=True)
@@ -256,6 +286,7 @@ def crossover(rosters):
         # some of the time so some parents will simply continue
         # on to the next generation, unchanged.
         if random.random() <= PERCENT_CROSSOVER:
+            n_crossovers += 1
             # pick a position and swap all the players at that position from one
             # roster to another:
             positions = random.sample(POSITIONS, 2)
@@ -292,6 +323,7 @@ def crossover(rosters):
         new_generation.append(child1)
         new_generation.append(child2)
 
+    print "%s crossovers (position groups) in this generation"%(n_crossovers,)
     return new_generation
 
 
@@ -320,6 +352,21 @@ def new_player_for_index(idx, current_player):
     return new_player
 
 
+def new_better_player_for_index(idx, current_player):
+    attempts = 0
+    players = list(itertools.ifilter(lambda x: x['ppr'] >= current_player['ppr'],  index_to_position_players(idx)))
+    new_player = current_player
+
+    while new_player['name'] == current_player['name']:
+        new_player = random.choice(players)
+        attempts += 1
+
+        if attempts >= 10:
+            break
+
+    return new_player
+
+
 def mutate(rosters):
     """
     Mutation would normally happen in a genetic algorithm at each possible position
@@ -327,11 +374,15 @@ def mutate(rosters):
     mutate we'll pick a new random player for that position.
 
     """
+    n_mutations = 0
 
     for players in rosters:
         for index in xrange(ROSTER_SIZE):
             if random.random() < MUTATION_CHANCE:
-                players[index] = new_player_for_index(index, players[index])
+                n_mutations += 1
+                players[index] = new_better_player_for_index(index, players[index])
+
+    print "%s mutations performed in this generation"%(n_mutations,)
 
     return rosters
 
@@ -349,13 +400,13 @@ def add_cost_and_points(rosters):
 
 
 def cull(rosters):
-    return [(cost, points, roster) for cost, points, roster in rosters if cost <= SALARY_CAP]
+    return [ (cost, points, roster) for cost, points, roster in rosters if cost <= SALARY_CAP ] #and points >= AVERAGE_POINTS]
 
 
 def compute_fitness(rosters):
     rosters = list(rosters)
     n_rosters = len(rosters)
-    percent_fitness = (sum([1 for cost, points, players in rosters if points >= fitness]) / (n_rosters * 1.0)) * 100.0
+    percent_fitness = (sum([1 for cost, points, players in rosters if points >= FITNESS]) / (n_rosters * 1.0)) * 100.0
     return percent_fitness
 
 
@@ -364,46 +415,62 @@ print "Calculating initial percent fitness for random population:"
 percent_fitness = compute_fitness(rosters)
 print "Initial percent_fitness:", percent_fitness
 
+last_percent_fitness = percent_fitness
+
+
+#top_25 = []
+
+best_rosters = []
+
 
 while generation < MAX_GENERATIONS and percent_fitness <= DESIRED_PERCENT_FITNESS:
+    #if len(rosters) < 1000:
+    ##print "Fewer than 1000 rosters left in the population, adding more..."
+    #n_new_rosters = 1000 - len(rosters)
+    more_rosters, _, generated = generate_population(100, required_points=AVERAGE_POINTS)
+    #print "Adding {} new rosters (out of {} generated rosters) to add new blood".format(n_new_rosters, generated)
+    rosters.extend(more_rosters)
+
     print "Not yet fit enough, performing crossover and mutation to generate new generation", generation, percent_fitness
     rosters = cull(add_cost_and_points(mutate(crossover_single_players(rosters))))
-    print "remaining rosters:", len(list(rosters))
+
     percent_fitness = compute_fitness(rosters)
     generation += 1
 
 
-# sort by cost then points
-rosters.sort(key=lambda r: (r[1], r[0]), reverse=True)
-print "ROSTERS:"
-for i, roster in enumerate(rosters[:10]):
-    print "ROSTER: %s"%(i,)
-    cost, points, players = roster
-    for player in players:
-        print player
-    print cost, points
 
-max_cap_rosters.sort(key=lambda r: (r[1], r[0]), reverse=True)
-print "MAX ROSTERS:"
-for i, roster in enumerate(max_cap_rosters[:10]):
-    print "MAX ROSTER: %s"%(i,)
-    cost, points, players = roster
-    for player in players:
-        print player
-    print cost, points
+    top_rosters = sorted(rosters, key=lambda r: r[1], reverse=True)[:40]
+    n = len(top_rosters)
 
+    avg_points = sum([r[1] for r in top_rosters]) / n
+    avg_cost = sum([r[0] for r in top_rosters]) / n
+
+    print "remaining rosters: {}, avg top 40 points {}, avg top 40 cost {}".format(
+        len(list(rosters)), avg_points, avg_cost
+    )
+
+    if percent_fitness > last_percent_fitness:
+        best_rosters = top_rosters
+
+    last_percent_fitness = percent_fitness
+
+if percent_fitness > DESIRED_PERCENT_FITNESS:
+    print "Percent Fitness %s exceeded threshold %s"%(percent_fitness, DESIRED_PERCENT_FITNESS)
+
+if generation >= MAX_GENERATIONS:
+    print "Exceeded MAX_GENERATIONS!"
 
 with open("templates/index.html", "r") as template_file:
     template = Template(template_file.read())
 
 with open("roster_{}.html".format(GAME_ID), "w") as roster_file:
     html = template.render(
-        rosters=rosters[:10],
-        max_rosters=max_cap_rosters[:10],
+        rosters=best_rosters,
+        max_rosters=[],
         best_roster=best_roster,
         best_cost=best_cost,
         best_points=best_points,
-        fitness=fitness,
+        fitness=FITNESS,
         week=WEEK,
         generated=generated,
         possible_players=total_players,
