@@ -3,3 +3,9 @@
 name = "handegg"
 version = "0.0.1"
 authors = ["Mike Steder <steder@gmail.com>"]
+
+[dependencies.postgres]
+git="https://github.com/sfackler/rust-postgres"
+
+[dependencies.postgres_macros]
+git="https://github.com/sfackler/rust-postgres-macros"

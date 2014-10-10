@@ -1,4 +1,38 @@
 [root]
 name = "handegg"
 version = "0.0.1"
+dependencies = [
+ "postgres 0.0.0 (git+https://github.com/sfackler/rust-postgres#557a159a8a4a8e33333b06ad2722b1322e95566c)",
+ "postgres_macros 0.0.0 (git+https://github.com/sfackler/rust-postgres-macros#0a6e92c6adec9ac7839167c3f2062fc29af647fb)",
+]
+
+[[package]]
+name = "openssl"
+version = "0.0.0"
+source = "git+https://github.com/sfackler/rust-openssl#bd38812880f54ab8c3bb9e61b643d38b8207f4b0"
+
+[[package]]
+name = "phf"
+version = "0.0.0"
+source = "git+https://github.com/sfackler/rust-phf#996edc690403b57e9a11ee3fb920a5f5c6dc9aef"
+
+[[package]]
+name = "phf_mac"
+version = "0.0.0"
+source = "git+https://github.com/sfackler/rust-phf#996edc690403b57e9a11ee3fb920a5f5c6dc9aef"
+
+[[package]]
+name = "postgres"
+version = "0.0.0"
+source = "git+https://github.com/sfackler/rust-postgres#557a159a8a4a8e33333b06ad2722b1322e95566c"
+dependencies = [
+ "openssl 0.0.0 (git+https://github.com/sfackler/rust-openssl#bd38812880f54ab8c3bb9e61b643d38b8207f4b0)",
+ "phf 0.0.0 (git+https://github.com/sfackler/rust-phf#996edc690403b57e9a11ee3fb920a5f5c6dc9aef)",
+ "phf_mac 0.0.0 (git+https://github.com/sfackler/rust-phf#996edc690403b57e9a11ee3fb920a5f5c6dc9aef)",
+]
+
+[[package]]
+name = "postgres_macros"
+version = "0.0.0"
+source = "git+https://github.com/sfackler/rust-postgres-macros#0a6e92c6adec9ac7839167c3f2062fc29af647fb"
 
