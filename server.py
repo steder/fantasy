@@ -16,7 +16,7 @@ def hello():
     return "Hello World!"
 
 
-@app.route("/data/<int:week>")
+@app.route("/stats/<int:week>")
 def get_data(week):
     connection = engine.connect()
     query = text("""
@@ -42,6 +42,19 @@ def get_data(week):
         )
 
     return jsonify(players=players)
+
+
+@app.route("/bookmarklet")
+def get_bookmarklet():
+    """
+    This endpoint serves our javascript program that pulls in our fantasy football stats data
+    and inserts it into to the dom.
+
+    Include the following in your page:
+
+        javascript:(function(){document.body.appendChild(document.createElement('script')).src='http://localhost:5000/bookmarklet';})();
+
+    """
 
 
 if __name__ == "__main__":
