@@ -22,13 +22,6 @@ def hello():
 
 @app.route("/stats/<int:week>")
 def get_data(week):
-    """
-    Use this endpoint by setting up the following bookmarklet and using it on your page:
-
-        javascript:(function(){document.body.appendChild(document.createElement('script')).src='http://localhost:5000/static/bookmarklet.js';})();
-    """
-
-
     connection = engine.connect()
     query = text("""
     select name, team, position, practice_status, injury, game_status, salary :: numeric, ppr, (ppr / (salary / MONEY(1000))) as PROJ,
@@ -47,7 +40,7 @@ def get_data(week):
         players.append(
             {
                 u"name": p['name'],
-                u"proj": float(p['proj']),
+                u"proj": round(float(p['proj']), 2),
                 u"points": float(p['ppr']),
             }
         )
