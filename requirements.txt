@@ -3,6 +3,11 @@ Jinja2==2.7.3
 MarkupSafe==0.23
 SQLAlchemy==0.9.7
 Werkzeug==0.9.6
+cffi==0.8.6
+cryptography==0.6
 itsdangerous==0.24
 psycopg2==2.5.4
+pyOpenSSL==0.14
+pycparser==2.10
 requests==2.4.1
+six==1.8.0

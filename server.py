@@ -18,6 +18,13 @@ def hello():
 
 @app.route("/stats/<int:week>")
 def get_data(week):
+    """
+    Use this endpoint by setting up the following bookmarklet and using it on your page:
+
+        javascript:(function(){document.body.appendChild(document.createElement('script')).src='http://localhost:5000/static/bookmarklet.js';})();
+    """
+
+
     connection = engine.connect()
     query = text("""
     select name, team, position, practice_status, injury, game_status, salary :: numeric, ppr, (ppr / (salary / MONEY(1000))) as PROJ,
@@ -44,18 +51,5 @@ def get_data(week):
     return jsonify(players=players)
 
 
-@app.route("/bookmarklet")
-def get_bookmarklet():
-    """
-    This endpoint serves our javascript program that pulls in our fantasy football stats data
-    and inserts it into to the dom.
-
-    Include the following in your page:
-
-        javascript:(function(){document.body.appendChild(document.createElement('script')).src='http://localhost:5000/bookmarklet';})();
-
-    """
-
-
 if __name__ == "__main__":
-    app.run()
+    app.run('0.0.0.0', debug=True, port=5000, ssl_context='adhoc')
