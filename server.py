@@ -1,11 +1,15 @@
 from flask import Flask
 from flask.json import jsonify
+from flask.ext.cors import CORS
 from sqlalchemy import create_engine
 from sqlalchemy import text
 
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
+app.config['CORS_HEADERS'] = 'Content-Type'
+
+cors = CORS(app)
 
 
 engine = create_engine('postgresql://127.0.0.1/fantasy', echo=True)
