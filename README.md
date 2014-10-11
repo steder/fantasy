@@ -17,3 +17,20 @@ Nothing but chaos at the moment
 ### Basic usage:
 
     FFN_API_KEY=<your api key> pipeline.sh <Game ID> <Week>
+
+### Bookmarklet Local
+
+1. start server.py
+
+```
+$ python server.py
+```
+
+2. go to `https://localhost:5000` and accept the self signed certificate
+
+3. setup the bookmarklet:
+
+```javascript:(function(){document.body.appendChild(document.createElement('script')).src='https://localhost:5000/static/bookmarklet.js';})();
+```
+
+4. use the bookmarklet
