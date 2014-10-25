@@ -16,6 +16,15 @@ var Fantasy = (function (me, $) {
           }
           console.log("Updated all players...");
           me.updateHeader();
+
+          // Now that we've adjusted the data in the table let's
+          // for jquery tablesorter to recognize that things
+          // have changed:
+          $(".player-list-table").trigger("update")
+
+          // Force things to re-sort with a couple clicks:
+          $("[data-sortkey='ppg']").click()
+          $("[data-sortkey='ppg']").click()
         }).
         fail(function(err) {
           console.log("Failed to get player data!");

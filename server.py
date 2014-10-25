@@ -1,4 +1,6 @@
 from flask import Flask
+from flask import render_template
+from flask import request
 from flask.json import jsonify
 from flask.ext.cors import CORS
 from sqlalchemy import create_engine
@@ -9,6 +11,7 @@ app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['CORS_HEADERS'] = 'Content-Type'
 
+
 cors = CORS(app)
 
 
@@ -17,19 +20,15 @@ engine = create_engine('postgresql://127.0.0.1/fantasy', echo=True)
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return render_template("home.html")
 
 
 @app.route("/stats/<int:week>")
 def get_data(week):
     connection = engine.connect()
     query = text("""
-    select name, team, position, practice_status, injury, game_status, salary :: numeric, ppr, (ppr / (salary / MONEY(1000))) as PROJ,
-    (ppr_low / (salary / MONEY(1000))) as LOW,
-    (ppr_high / (salary / MONEY(1000))) as HIGH,
-    (ppr_high / (salary / MONEY(1000))) -  (ppr_low / (salary / MONEY(1000))) AS DELTA
+    select name, team, position, practice_status, injury, game_status, salary :: numeric, ppr, (ppr_high / (salary / MONEY(1000))) as PROJ
     from players where week = :week and salary > MONEY(0)
-    AND ppr > 0
     order by (ppr / (salary / MONEY(1000))) DESC
     """)
 
@@ -44,6 +43,29 @@ def get_data(week):
                 u"points": float(p['ppr']),
             }
         )
+
+    return jsonify(players=players)
+
+
+@app.route("/points")
+def get_points_for_players():
+    week = request.args.get("week")
+    print "week:", week
+    name_list = request.args.getlist("names[]")
+    print "names:", name_list
+
+    names = ",".join(["'%s'"%(name,) for name in name_list])
+
+    connection = engine.connect()
+    query = text("""
+    select name, ppr_high as points
+    from players
+    where name = ANY (:names) AND week = :week
+    """)
+    players = []
+    for p in connection.execute(query, names=name_list, week=week):
+        players.append({u"name": p.name,
+                        u"points": float(p.points)})
 
     return jsonify(players=players)
 

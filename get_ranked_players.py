@@ -23,14 +23,12 @@ connection = engine.connect()
 
 
 query = text("""
-select name, team, position, practice_status, injury, game_status, salary :: numeric, ppr, (ppr / (salary / MONEY(1000))) as PROJ,
-  (ppr_low / (salary / MONEY(1000))) as LOW,
-  (ppr_high / (salary / MONEY(1000))) as HIGH,
-  (ppr_high / (salary / MONEY(1000))) -  (ppr_low / (salary / MONEY(1000))) AS DELTA
+select name, team, position, practice_status, injury, game_status, salary :: numeric, ppr, (ppr_high / (salary / MONEY(1000))) as PROJ,
+  ppr_high as HIGH
 from players where week = :week and salary > MONEY(0)
 AND position = :position
 AND ppr > 0
-order by (ppr / (salary / MONEY(1000))) DESC
+order by PROJ DESC
 """)
 
 
@@ -45,22 +43,22 @@ defs = connection.execute(query, week=WEEK, position='DEF')
 TOP_N = 50
 
 qbs = list(qbs)
-best_qbs = sorted(qbs, key=lambda p: p['proj'], reverse=True)[:TOP_N]
+best_qbs = sorted(qbs, key=lambda p: p['proj'], reverse=True)# [:TOP_N]
 
 rbs = list(rbs)
-best_rbs = sorted(rbs, key=lambda p: p['proj'], reverse=True)[:TOP_N]
+best_rbs = sorted(rbs, key=lambda p: p['proj'], reverse=True)# [:TOP_N]
 
 wrs = list(wrs)
-best_wrs = sorted(wrs, key=lambda p: p['proj'], reverse=True)[:TOP_N]
+best_wrs = sorted(wrs, key=lambda p: p['proj'], reverse=True)# [:TOP_N]
 
 tes = list(tes)
-best_tes = sorted(tes, key=lambda p: p['proj'], reverse=True)[:TOP_N]
+best_tes = sorted(tes, key=lambda p: p['proj'], reverse=True)# [:TOP_N]
 
 ks = list(ks)
-best_ks = sorted(ks, key=lambda p: p['proj'], reverse=True)[:TOP_N]
+best_ks = sorted(ks, key=lambda p: p['proj'], reverse=True)# [:TOP_N]
 
 defs = list(defs)
-best_defs = sorted(defs, key=lambda p: p['proj'], reverse=True)[:TOP_N]
+best_defs = sorted(defs, key=lambda p: p['proj'], reverse=True)# [:TOP_N]
 
 
 positions = [
