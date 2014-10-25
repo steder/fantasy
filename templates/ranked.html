@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!-- Bootstrap -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+
+    <script src="http://code.jquery.com/jquery-2.1.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <h1>Rankings for Game ({{game_id}}) on week {{week}}</h1>
+
+    <ul class="nav nav-tabs" role="tablist">
+    {% for position, players in positions %}
+    {% if position == "QB" %}
+    <li class="active">
+    {% else %}
+    <li>
+    {% endif %}
+    <a href="#{{position}}" role="tab" data-toggle="tab">{{position}}s</a>
+    </li>
+    {% endfor %}
+    </ul>
+
+    <div class="tab-content">
+      {% for position, players in positions %}
+      {% if position == "QB" %}
+        <div class="tab-pane active" id="{{position}}">
+      {% else %}
+        <div class="tab-pane" id="{{position}}">
+      {% endif %}
+      <h2>Top {{top_n}} {{position}}s</h2>
+      <table class="table table-striped table-hover table-condensed">
+        <thead>
+          <th>Name</th>
+          <th>Team</th>
+          <th>Position</th>
+          <th>Salary</th>
+          <th>Projected</th>
+          <th>Ratio</th>
+        </thead>
+        <tbody>
+          {% for player in players %}
+          <tr>
+            <td>{{player.name}}</td>
+            <td>{{player.team}}</td>
+            <td>{{player.position}}</td>
+            <td>{{player.salary}}</td>
+            <td>{{player.ppr}}</td>
+            <td>{{player.proj}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% endfor %}
+    </div>
+
+  </body>
+</html>

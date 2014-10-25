@@ -4,7 +4,7 @@ var Fantasy = (function (me, $) {
   };
 
   me.loadStats = function() {
-    var week = "6";
+    var week = 8;
     var promise = $.getJSON("https://localhost:5000/stats/" + week).
         done(function(data) {
           console.log("Successfully got player data:");

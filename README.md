@@ -34,3 +34,9 @@ $ python server.py
 ```
 
 4. use the bookmarklet
+
+### Sandman for Basic API
+
+```
+sandmanctl --no-generate-pks --show-pks postgresql://localhost:5432/fantasy
+```

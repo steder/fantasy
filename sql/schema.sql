@@ -8,7 +8,7 @@
 -- {"week": "1", "lastUpdate": null, "name": "Peyton Manning", "practiceStatus": null, "playerId": "66", "standard": "24.30", "standardLow": "16.50", "ppr": "24.30", "pprLow": "16.50", "standardHigh": "32.00", "pprHigh": "32.00", "team": "DEN", "position": "QB", "injury": null, "gameStatus": null}
 
 CREATE TABLE IF NOT EXISTS players (
-       id SERIAL,
+       id SERIAL PRIMARY KEY NOT NULL,
        name TEXT,
        team TEXT,
        position TEXT,
