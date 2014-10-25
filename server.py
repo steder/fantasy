@@ -3,7 +3,7 @@ from flask.json import jsonify
 from flask.ext.cors import CORS
 from sqlalchemy import create_engine
 from sqlalchemy import text
-
+from werkzeug.serving import make_ssl_devcert
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -49,4 +49,4 @@ def get_data(week):
 
 
 if __name__ == "__main__":
-    app.run('0.0.0.0', debug=True, port=5000, ssl_context='adhoc')
+    app.run('0.0.0.0', debug=True, port=5000, ssl_context=('server.crt', 'server.key'))
